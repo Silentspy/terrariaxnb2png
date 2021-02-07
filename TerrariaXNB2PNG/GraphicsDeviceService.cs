@@ -62,7 +62,7 @@ namespace WinFormsGraphicsDevice
             parameters.IsFullScreen = false;
 
             graphicsDevice = new GraphicsDevice(GraphicsAdapter.DefaultAdapter,
-                                                GraphicsProfile.Reach,
+                                                GraphicsProfile.HiDef,
                                                 parameters);
         }
 
@@ -108,7 +108,7 @@ namespace WinFormsGraphicsDevice
             }
         }
 
-        
+
         /// <summary>
         /// Resets the graphics device to whichever is bigger out of the specified
         /// resolution or its current size. This behavior means the device will
@@ -128,7 +128,7 @@ namespace WinFormsGraphicsDevice
                 DeviceReset(this, EventArgs.Empty);
         }
 
-        
+
         /// <summary>
         /// Gets the current graphics device.
         /// </summary>
