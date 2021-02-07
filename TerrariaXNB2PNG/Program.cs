@@ -19,44 +19,71 @@ namespace TerrariaXNB2PNG
         {
             if ((args.Length > 0) && File.Exists(args[0]))
             {
-                new Program().instance(args);
+                new Program().Instance(args, false);
+            }
+            else if ((args.Length > 0) && Directory.Exists(args[0]))
+            {
+                new Program().Instance(args, true);
             }
             else
             {
                 Console.WriteLine(System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + " <path...>");
             }
 
-            if (getParentProcess().ToLower().Equals("explorer") || getParentProcess().ToLower().Equals("devenv"))
+            if (GetParentProcess().ToLower().Equals("explorer") || GetParentProcess().ToLower().Equals("devenv"))
             {
                 Console.WriteLine("Press any key to exit");
                 Console.ReadKey();
             }
         }
 
-        public void instance(string[] args)
+        public void Instance(string[] args, bool isPathFolder)
         {
             try
             {
-
                 Form form = new Form();
                 GraphicsDeviceService gds = GraphicsDeviceService.AddRef(form.Handle, form.ClientSize.Width, form.ClientSize.Height);
                 ServiceContainer services = new ServiceContainer();
                 services.AddService<IGraphicsDeviceService>(gds);
                 var content = new ContentManager(services);
 
-                foreach (string p in args)
+                if (!isPathFolder)  //if we get a file
                 {
-                    Console.WriteLine(System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + " " + p);
-                    if (File.Exists(p))
+                    foreach (string file in args)
                     {
-                        if (Path.GetExtension(p).Equals(".xnb"))
+                        Console.WriteLine(System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + " " + file);
+                        if (File.Exists(file))
                         {
-                            ConvertToPng(content, p);
+                            if (Path.GetExtension(file).Equals(".xnb"))
+                            {
+                                ConvertToPng(content, file);
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid file path or file");
                         }
                     }
-                    else
+                }
+                else      //if we get a folder
+                {
+                    DirectoryInfo dir = new DirectoryInfo(args[0]);
+
+                    foreach (var file in dir.GetFiles("*.xnb", SearchOption.AllDirectories))   //we search for every file in all subdirectories
                     {
-                        Console.WriteLine("Invalid file path or file");
+                        Console.WriteLine(System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + " " + file.FullName);
+                        if (File.Exists(file.FullName))
+                        {
+                            if (Path.GetExtension(file.FullName).Equals(".xnb"))
+                            {
+                                ConvertToPng(content, file.FullName);
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid file path or file");
+                        }
+
                     }
                 }
 
@@ -72,7 +99,7 @@ namespace TerrariaXNB2PNG
             }
         }
 
-        static string getParentProcess()
+        static string GetParentProcess()
         {
             var myId = Process.GetCurrentProcess().Id;
             var query = string.Format("SELECT ParentProcessId FROM Win32_Process WHERE ProcessId = {0}", myId);
@@ -92,7 +119,7 @@ namespace TerrariaXNB2PNG
                 Random rnd = new Random();
                 string assetName = Path.GetFileName(filename.Replace(".xnb", ".temp.") + rnd.Next(1000 + 1) + ".xnb");
                 File.Copy(filename, AppDomain.CurrentDomain.BaseDirectory + assetName);
-                Texture2D tex = content.Load<Texture2D>(assetName.Replace(".xnb",""));
+                Texture2D tex = content.Load<Texture2D>(assetName.Replace(".xnb", ""));
                 string filenamePNGEXT = filename.Replace(".xnb", ".png");
                 filesToDelete.Add(AppDomain.CurrentDomain.BaseDirectory + assetName);
 
@@ -125,7 +152,7 @@ namespace TerrariaXNB2PNG
 
         void ConvertToNXB()
         {
-
+            //TODO
         }
     }
 }
